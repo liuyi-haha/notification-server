@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.13</version>
+        <relativePath/>
+    </parent>
+    <groupId>org.liuyi</groupId>
+    <artifactId>notification-server</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>notification-server</name>
+    <description>notification-server</description>
+
+    <properties>
+        <java.version>17</java.version>
+        <openapi.generator.version>7.19.0</openapi.generator.version>
+        <dubbo.version>3.3.0-beta.1</dubbo.version>
+        <spring-cloud-alibaba.version>2025.0.0.0</spring-cloud-alibaba.version>
+        <protobuf.version>3.25.5</protobuf.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- Spring Boot Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Spring Boot WebSocket -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
+        <!-- Spring Boot Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- 公共仓库 -->
+        <dependency>
+            <groupId>com.github.liuyi-haha</groupId>
+            <artifactId>instant-messaging-system-common</artifactId>
+            <version>main-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.liuyi-haha</groupId>
+            <artifactId>chat-server-api</artifactId>
+            <version>main-SNAPSHOT</version>
+        </dependency>
+
+        <!-- 数据库驱动 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+            <version>6.2.16</version>
+        </dependency>
+
+        <!-- Kafka -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Dubbo -->
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo-spring-boot-starter</artifactId>
+            <version>${dubbo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+            <version>2.2.4</version>
+        </dependency>
+
+        <!-- 服务发现 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+            <version>${spring-cloud-alibaba.version}</version>
+        </dependency>
+
+        <!-- Jakarta Validation API -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- OpenAPI Jackson Nullable 支持 -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
+
+        <!-- OpenAPI 注解 -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>2.2.15</version>
+        </dependency>
+
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- Protobuf 运行时 -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Spring Boot 插件 -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- OpenAPI 生成器插件 -->
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <version>${openapi.generator.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/src/main/resources/api.yaml</inputSpec>
+                            <generatorName>spring</generatorName>
+                            <output>${project.build.directory}/generated-sources/openapi</output>
+                            <apiPackage>com.liuyi.auth.openapi</apiPackage>
+                            <modelPackage>com.liuyi.auth.openapi</modelPackage>
+                            <configOptions>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <interfaceOnly>true</interfaceOnly>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Protobuf 编译插件（使用本地 protoc.exe） -->
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.6.1</version>
+                <configuration>
+                    <!-- 指定本地 protoc.exe 路径 -->
+                    <protocExecutable>F:\GraduationProject\component\protoc-25.5-win64\bin\protoc.exe</protocExecutable>
+                    <protoSourceRoot>${project.basedir}/src/main/proto</protoSourceRoot>
+                    <outputDirectory>${project.build.directory}/generated-sources/protobuf/java</outputDirectory>
+                    <clearOutputDirectory>true</clearOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 添加生成的源码到构建路径 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.4.0</version>
+                <executions>
+                    <!-- OpenAPI 生成的源码 -->
+                    <execution>
+                        <id>add-openapi-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/openapi/src/main/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                    <!-- Protobuf 生成的源码 -->
+                    <execution>
+                        <id>add-protobuf-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/protobuf/java</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

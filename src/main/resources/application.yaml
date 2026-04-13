@@ -1,0 +1,46 @@
+server:
+  port: 8081
+
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092  # 必配
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer  # ✅ 改这里
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer  # ✅ 改这里
+      group-id: ${spring.application.name}
+      properties:
+        spring.json.trusted.packages: "*"  # 🔐 安全配置，必须加
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848  # Nacos地址
+        service: ${spring.application.name}-http  # 注册为HTTP服务，网关路由时使用
+  profiles:
+    active: prod  # 激活生产环境配置
+dubbo:
+  application:
+    name: ${spring.application.name}
+  registry:
+    address: nacos://localhost:8848
+  protocol:
+    name: dubbo
+    port: -1
+  consumer:
+    check: false
+
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          servlet:
+            DispatcherServlet:
+              DEBUG
+            mvc:
+              method:
+                annotation:
+                  DEBUG
