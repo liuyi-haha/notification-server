@@ -2,11 +2,12 @@ package org.liuyi.notification.application;
 
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.liuyi.notification.notifications.*;
+import com.liuyi.notification.notifications.DocumentType;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.liuyi.chat_api.event.*;
 import org.liuyi.chat_api.event.HandleFriendApplicationResultType;
 import org.liuyi.chat_api.event.MessageType;
-import org.liuyi.common.domain.exception.DomainException;
 import org.liuyi.notification.adapter.repository.FriendApplicationHandledNotificationRepository;
 import org.liuyi.notification.adapter.repository.FriendApplicationReceivedNotificationRepository;
 import org.liuyi.notification.adapter.repository.MessageReceivedNotificationRepository;
@@ -26,10 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,6 +38,7 @@ import static org.mockito.Mockito.when;
 @SpringBootTest
 @Transactional
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.ANY)
+@Slf4j
 public class subscriber_处理用户上线事件Test {
     @Autowired
     WebSocketSubscriber subscriber;
@@ -66,6 +65,14 @@ public class subscriber_处理用户上线事件Test {
                 .thenReturn(Set.of("user_002", "123456789"));
         when(chatClient.getSessionUserIds("chat_session_003"))
                 .thenReturn(Set.of("user_003", "123456789"));
+        when(chatClient.getSessionUserIds("chat_session_004"))
+                .thenReturn(Set.of("user_004", "123456789"));
+        when(chatClient.getSessionUserIds("chat_session_005"))
+                .thenReturn(Set.of("user_005", "123456789"));
+        when(chatClient.getSessionUserIds("chat_session_006"))
+                .thenReturn(Set.of("user_006", "123456789"));
+        when(chatClient.getSessionUserIds("chat_session_007"))
+                .thenReturn(Set.of("user_007", "123456789"));
 
 
         // 在用户离线期间收到一些事件
@@ -104,7 +111,7 @@ public class subscriber_处理用户上线事件Test {
 
         // 验证实际发送的通知与期望的一致
         var binaryMessages = session.getBinaryMessages();
-        assertEquals(9, binaryMessages.size());
+        assertEquals(13, binaryMessages.size());
 
         var actualNotifications = session.getBinaryMessages().stream()
                 .map(BinaryMessage::getPayload)
@@ -187,11 +194,6 @@ public class subscriber_处理用户上线事件Test {
                 .fromUserId("123456789")
                 .toUserId("user_002")
                 .resultType(HandleFriendApplicationResultType.REJECTED)
-                .isNewFriendShip(false)
-                .friendshipId(null)
-                .privateChatSessionId(null)
-                .applicantParticipantId(null)
-                .targetUserParticipantId(null)
                 .build();
 
         // 事件3：同意好友申请，但已是好友关系（重复添加场景）
@@ -236,7 +238,7 @@ public class subscriber_处理用户上线事件Test {
                 .senderUserId("user_002")
                 .build();
 
-        // 事件3：用户003发送图片消息（或其他类型）
+        // 事件3：用户003发送文本消息
         MessageSentEvent event3 = MessageSentEvent.builder()
                 .messageType(MessageType.TEXT)  // 假设有IMAGE类型
                 .sendTime(Instant.now())
@@ -247,11 +249,69 @@ public class subscriber_处理用户上线事件Test {
                 .senderUserId("user_003")
                 .build();
 
+        // 事件4: 用户004发送图片消息
+        MessageSentEvent event4 = MessageSentEvent.builder()
+                .messageType(MessageType.IMAGE)  // 假设有IMAGE类型
+                .sendTime(Instant.now())
+                .sessionId("chat_session_004")
+                .messageId("msg_10004")
+                .seqInSession(1)
+                .senderUserId("user_004")
+                .fileId("image-file-id-123")
+                .imageWidth(600)
+                .imageHeight(800)
+                .build();
+
+        // 事件5: 用户005发送语音消息
+        MessageSentEvent event5 = MessageSentEvent.builder()
+                .messageType(MessageType.SPEECH)  // 假设有IMAGE类型
+                .sendTime(Instant.now())
+                .sessionId("chat_session_005")
+                .messageId("msg_10005")
+                .seqInSession(1)
+                .senderUserId("user_005")
+                .fileId("speech-file-id-123")
+                .speechDurationSeconds(20)
+                .build();
+
+        // 事件6: 用户006发送PDF类型的文档消息
+        MessageSentEvent event6 = MessageSentEvent.builder()
+                .messageType(MessageType.DOCUMENT)  // 假设有IMAGE类型
+                .sendTime(Instant.now())
+                .sessionId("chat_session_006")
+                .messageId("msg_10006")
+                .seqInSession(1)
+                .senderUserId("user_006")
+                .fileId("document-file-id-123")
+                .documentName("项目计划.pdf")
+                .documentBytes(1024L * 1024L) // 1MB
+                .documentType(org.liuyi.chat_api.event.DocumentType.PDF)
+                .build();
+
+        // 事件6: 用户007发送其它类型的文档消息
+        MessageSentEvent event7 = MessageSentEvent.builder()
+                .messageType(MessageType.DOCUMENT)  // 假设有IMAGE类型
+                .sendTime(Instant.now())
+                .sessionId("chat_session_007")
+                .messageId("msg_10007")
+                .seqInSession(1)
+                .senderUserId("user_007")
+                .fileId("document-file-id-234")
+                .documentName("其它类型的消息.wav")
+                .documentBytes(1024L * 1024L) // 1MB
+                .documentType(org.liuyi.chat_api.event.DocumentType.OTHER)
+                .build();
+
+
         application.handle(event1);
         application.handle(event2);
         application.handle(event3);
+        application.handle(event4);
+        application.handle(event5);
+        application.handle(event6);
+        application.handle(event7);
 
-        return List.of(event1, event2, event3);
+        return List.of(event1, event2, event3, event4, event5, event6, event7);
     }
 
     private WebSocketNotification friendApplicationSentEventToWebsocketNotification(FriendApplicationSentEvent event) {
@@ -276,7 +336,7 @@ public class subscriber_处理用户上线事件Test {
                 .setResultType(resultType)
                 .setIsNewFriendship(event.isNewFriendShip())
                 .setFriendshipId(Objects.toString(event.getFriendshipId(), ""))
-                .setPrivateChatSessionId(Objects.toString(event.getFriendshipId(), ""))
+                .setPrivateChatSessionId(Objects.toString(event.getPrivateChatSessionId(), ""))
                 .setApplicantParticipantId(Objects.toString(event.getApplicantParticipantId(), ""))
                 .setTargetUserParticipantId(Objects.toString(event.getTargetUserParticipantId(), ""))
                 .build();
@@ -292,9 +352,10 @@ public class subscriber_处理用户上线事件Test {
         // 实际实现可能需要根据消息类型构建不同的通知内容
         var messageType = switch (event.getMessageType()) {
             case TEXT -> com.liuyi.notification.notifications.MessageType.MESSAGE_TYPE_TEXT;
-            default -> throw new DomainException("暂不支持的消息类型: " + event.getMessageType());
+            case IMAGE -> com.liuyi.notification.notifications.MessageType.MESSAGE_TYPE_IMAGE;
+            case SPEECH -> com.liuyi.notification.notifications.MessageType.MESSAGE_TYPE_AUDIO;
+            case DOCUMENT -> com.liuyi.notification.notifications.MessageType.MESSAGE_TYPE_DOCUMENT;
         };
-        // 在线则发送
         var notification = MessageReceivedNotification.newBuilder()
                 .setMessageType(messageType)
                 .setSendTime(event.getSendTime().toString())
@@ -302,12 +363,34 @@ public class subscriber_处理用户上线事件Test {
                 .setMessageId(event.getMessageId())
                 .setSeqInSession(event.getSeqInSession())
                 .setSenderUserId(event.getSenderUserId())
-                .setTextContent(event.getTextContent())
+                .setTextContent(Optional.ofNullable(event.getTextContent()).orElse(""))
+                .setFileId(Optional.ofNullable(event.getFileId()).orElse(""))
+                .setImageWidth(Optional.ofNullable(event.getImageWidth()).orElse(0))
+                .setImageHeight(Optional.ofNullable(event.getImageHeight()).orElse(0))
+                .setAudioDurationSeconds(Optional.ofNullable(event.getSpeechDurationSeconds()).orElse(0))
+                .setDocumentName(Optional.ofNullable(event.getDocumentName()).orElse(""))
+                .setDocumentSizeBytes(Optional.ofNullable(event.getDocumentBytes()).orElse(0L))
+                .setDocumentType(eventDocumentTypeToNotificationDocumentType(event.getDocumentType()))
                 .build();
+
+
+        log.info("构建消息通知: {}", notification);
 
         return WebSocketNotification.newBuilder()
                 .setType(NotificationType.TYPE_MESSAGE_RECEIVED)
                 .setPayload(notification.toByteString())
                 .build();
+    }
+
+    private DocumentType eventDocumentTypeToNotificationDocumentType(org.liuyi.chat_api.event.DocumentType documentType) {
+        if (documentType == null) {
+            return DocumentType.DOCUMENT_TYPE_UNKNOWN;
+        }
+        return switch (documentType) {
+            case WORD -> DocumentType.DOCUMENT_TYPE_WORD;
+            case PDF -> DocumentType.DOCUMENT_TYPE_PDF;
+            case TXT -> DocumentType.DOCUMENT_TYPE_TXT;
+            case OTHER -> DocumentType.DOCUMENT_TYPE_OTHER;
+        };
     }
 }

@@ -14,11 +14,20 @@ public class ConnectionManager {
     private final Map<String, WebSocketSession> sessions = new ConcurrentHashMap<>();
 
     public void addSession(String userId, WebSocketSession session) {
+        // 先remove，再put
+        removeSession(userId);
         sessions.put(userId, session);
     }
 
     public void removeSession(String userId) {
-        sessions.remove(userId);
+        WebSocketSession session = sessions.remove(userId);
+        if (session != null && session.isOpen()) {
+            try {
+                session.close();  // 主动关闭连接
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public WebSocketSession getSession(String userId) {

@@ -34,15 +34,15 @@ public class FriendApplicationHandledNotificationDO {
     @Column(name = "is_new_friendship", nullable = false)
     private Boolean isNewFriendship;
 
-    @Column(name = "friendship_id")
+    @Column(name = "friendship_id", nullable = false)
     private String friendshipId;
 
-    @Column(name = "private_chat_session_id")
+    @Column(name = "private_chat_session_id", nullable = false)
     private String privateChatSessionId;
 
-    @Column(name = "applicant_participant_id")
+    @Column(name = "applicant_participant_id", nullable = false)
     private String applicantParticipantId;
 
-    @Column(name = "target_user_participant_id")
+    @Column(name = "target_user_participant_id", nullable = false)
     private String targetUserParticipantId;
 }

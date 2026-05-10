@@ -49,7 +49,17 @@ message FriendApplicationHandledNotification {
 enum MessageType {
   MESSAGE_TYPE_UNKNOWN = 0;
   MESSAGE_TYPE_TEXT = 1;      // 文本消息
-  // 后续扩展: IMAGE, AUDIO, VIDEO, FILE 等
+  MESSAGE_TYPE_IMAGE = 2;     // 图片消息
+  MESSAGE_TYPE_AUDIO = 3;     // 音频消息
+  MESSAGE_TYPE_DOCUMENT = 4;      // 文档消息
+}
+
+enum DocumentType {
+  DOCUMENT_TYPE_UNKNOWN = 0;
+  DOCUMENT_TYPE_PDF = 1;     // PDF文档
+  DOCUMENT_TYPE_WORD = 2;    // Word文档
+  DOCUMENT_TYPE_TXT = 3;     // 文本文档
+  DOCUMENT_TYPE_OTHER = 4;   // 其他类型文档
 }
 
 // ===== 消息收到通知 =====
@@ -60,5 +70,15 @@ message MessageReceivedNotification {
   string message_id = 4;             // 消息ID
   int32 seq_in_session = 5;          // 会话内消息序号
   string sender_user_id = 6;         // 发送者用户ID
-  string text_content = 7;           // 文本消息内容(当前版本仅文本，后续扩展其他字段)
+  string text_content = 7;           // 文本消息内容
+  string file_id = 8;              // 文件ID（仅当消息类型为非文本时有值）
+  // 图片消息字段
+  int32 image_width = 9;
+  int32 image_height = 10;
+  // 语音消息字段
+  int32 audio_duration_seconds = 11;
+  // 文档消息字段
+  string document_name = 12;
+  int64 document_size_bytes = 13;
+  DocumentType document_type = 14;
 }

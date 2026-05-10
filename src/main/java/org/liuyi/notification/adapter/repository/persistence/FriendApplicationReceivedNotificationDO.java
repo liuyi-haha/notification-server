@@ -28,7 +28,7 @@ public class FriendApplicationReceivedNotificationDO {
     @Column(name = "application_id", nullable = false, unique = true)
     private String applicationId;
 
-    @Column(name = "verification_message", length = 512)
+    @Column(name = "verification_message", length = 512, nullable = false)
     private String verificationMessage;
 
     @Column(name = "send_time", nullable = false)
